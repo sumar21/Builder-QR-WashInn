@@ -17,9 +17,9 @@ const fieldSchema = [
   { name: "latitud2_ED", type: "number" },
   { name: "longitud2_ED", type: "number" },
   { name: "encargado", type: "string" },
-  { name: "telefono", type: "number" },
+  { name: "telefono", type: "integer" },
   { name: "horario", type: "string" },
-  { name: "frecuencia", type: "number" },
+  { name: "frecuencia", type: "integer" },
   { name: "grupo_ventilacion", type: "string" },
   { name: "mail", type: "string" },
   { name: "observaciones", type: "string" }
