@@ -306,7 +306,7 @@ function parseNumber(rawValue) {
 function formatEdStringValue(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "";
   const floored = Math.floor(value * 1000) / 1000;
-  return floored.toFixed(3).replace(/\.?0+$/, "");
+  return floored.toFixed(3).replace(".", ",");
 }
 
 function buildEndpointPayload(payload) {
