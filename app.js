@@ -17,13 +17,19 @@ const fieldSchema = [
   { name: "latitud2_ED", type: "number" },
   { name: "longitud2_ED", type: "number" },
   { name: "encargado", type: "string" },
-  { name: "telefono", type: "integer" },
+  { name: "telefono", type: "number" },
   { name: "horario", type: "string" },
-  { name: "frecuencia", type: "integer" },
+  { name: "frecuencia", type: "number" },
   { name: "grupo_ventilacion", type: "string" },
   { name: "mail", type: "string" },
   { name: "observaciones", type: "string" }
 ];
+const endpointStringEdFields = new Set([
+  "latitud_ED",
+  "longitud_ED",
+  "latitud2_ED",
+  "longitud2_ED"
+]);
 
 const form = document.getElementById("buildingForm");
 const sendButton = document.getElementById("btnSend");
@@ -297,6 +303,23 @@ function parseNumber(rawValue) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function formatEdStringValue(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "";
+  const floored = Math.floor(value * 1000) / 1000;
+  return floored.toFixed(3).replace(/\.?0+$/, "");
+}
+
+function buildEndpointPayload(payload) {
+  const output = {};
+
+  for (const field of fieldSchema) {
+    const value = payload[field.name];
+    output[field.name] = endpointStringEdFields.has(field.name) ? formatEdStringValue(value) : value;
+  }
+
+  return output;
+}
+
 function normalizeCoordinateDraft(value) {
   return value.replace(/,/g, ".");
 }
@@ -547,7 +570,7 @@ async function sendPayload(payload) {
   const response = await fetch(ENDPOINT_URL, {
     method: "POST",
     headers,
-    body: JSON.stringify(payload)
+    body: JSON.stringify(buildEndpointPayload(payload))
   });
 
   if (!response.ok) {
@@ -605,6 +628,11 @@ async function handleSubmit(event) {
     if (apiErrorCode === "DirectApiAuthorizationRequired") {
       setStatus(
         "No pudimos guardar por una configuración de seguridad. Avisá al equipo técnico.",
+        "error"
+      );
+    } else if (apiErrorCode === "TriggerInputSchemaMismatch") {
+      setStatus(
+        "El flujo rechazó el formato de datos. Revisá el schema configurado en Power Automate.",
         "error"
       );
     } else if (apiErrorCode && apiErrorCode !== "HTTP_ERROR") {
