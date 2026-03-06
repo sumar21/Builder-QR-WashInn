@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wash Inn | Generador QR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="form-section">
+        <article class="modal-card">
+          <header class="modal-header">
+            <h1>Agregar edificio</h1>
+          </header>
+
+          <form id="buildingForm" novalidate>
+            <div class="form-grid">
+              <label class="field span-1">
+                <span>Código</span>
+                <input name="codigo" type="text" placeholder="Ej: 3919" />
+              </label>
+
+              <label class="field span-3">
+                <span>Edificio</span>
+                <input name="edificio" type="text" placeholder="Nombre del edificio" />
+              </label>
+
+              <label class="field span-1">
+                <span>Latitud 1</span>
+                <input name="latitud1" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Longitud 1</span>
+                <input name="longitud1" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Latitud 2</span>
+                <input name="latitud2" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Longitud 2</span>
+                <input name="longitud2" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Latitud ED</span>
+                <input name="latitud_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Longitud ED</span>
+                <input name="longitud_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Latitud 2 ED</span>
+                <input name="latitud2_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-1">
+                <span>Longitud 2 ED</span>
+                <input name="longitud2_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+              </label>
+
+              <label class="field span-4">
+                <span>Dirección</span>
+                <input name="direccion" type="text" placeholder="Calle y ciudad" />
+              </label>
+
+              <label class="field span-1">
+                <span>Encargado</span>
+                <input name="encargado" type="text" />
+              </label>
+
+              <label class="field span-1">
+                <span>Teléfono</span>
+                <input name="telefono" type="number" step="1" />
+              </label>
+
+              <label class="field span-1">
+                <span>Horario</span>
+                <input name="horario" type="text" placeholder="Ej: 8 a 12" />
+              </label>
+
+              <label class="field span-1">
+                <span>Frecuencia</span>
+                <input name="frecuencia" type="number" step="1" />
+              </label>
+
+              <label class="field span-2">
+                <span>Grupo ventilación</span>
+                <input name="grupo_ventilacion" type="text" />
+              </label>
+
+              <label class="field span-2">
+                <span>Mail</span>
+                <input name="mail" type="email" />
+              </label>
+
+              <label class="field span-4">
+                <span>Observaciones</span>
+                <textarea name="observaciones" rows="4"></textarea>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button id="btnSend" type="submit" class="btn btn-primary">Guardar datos</button>
+            </div>
+
+            <div class="flow-panel" aria-live="polite">
+              <div class="flow-top">
+                <p id="flowLabel">Paso 1 de 3 · Completá el formulario</p>
+                <p id="completionLabel">0% completo</p>
+              </div>
+              <div class="flow-track" aria-hidden="true">
+                <span id="progressBar" class="flow-bar"></span>
+              </div>
+              <p id="flowHelper" class="flow-helper">
+                Completá todos los campos para poder guardar y habilitar la descarga.
+              </p>
+            </div>
+          </form>
+
+          <p id="statusMessage" class="status-message" aria-live="polite"></p>
+        </article>
+      </section>
+
+      <section class="preview-section">
+        <div class="preview-header">
+          <h2>Vista previa</h2>
+          <p>Salida final en JPG 1080x1350</p>
+        </div>
+
+        <div class="poster-frame">
+          <canvas id="posterCanvas" width="1080" height="1350" aria-label="Poster QR de edificio"></canvas>
+        </div>
+
+        <div id="downloadGate" class="download-gate" data-state="blocked">
+          <strong id="downloadGateTitle">Descarga bloqueada</strong>
+          <p id="downloadGateMessage">Completá el formulario al 100% y guardá los datos.</p>
+        </div>
+
+        <button id="btnDownload" type="button" class="btn btn-download" disabled aria-disabled="true">
+          Descargar JPG 1080x1350
+        </button>
+      </section>
+    </main>
+
+    <script src="qrcode.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
