@@ -42,42 +42,22 @@
 
               <label class="field span-1">
                 <span>Latitud 1</span>
-                <input name="latitud1" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+                <input name="latitud1" type="text" inputmode="decimal" data-coordinate="true" />
               </label>
 
               <label class="field span-1">
                 <span>Longitud 1</span>
-                <input name="longitud1" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+                <input name="longitud1" type="text" inputmode="decimal" data-coordinate="true" />
               </label>
 
               <label class="field span-1">
                 <span>Latitud 2</span>
-                <input name="latitud2" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+                <input name="latitud2" type="text" inputmode="decimal" data-coordinate="true" />
               </label>
 
               <label class="field span-1">
                 <span>Longitud 2</span>
-                <input name="longitud2" type="number" step="any" inputmode="decimal" data-coordinate="true" />
-              </label>
-
-              <label class="field span-1">
-                <span>Latitud ED</span>
-                <input name="latitud_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
-              </label>
-
-              <label class="field span-1">
-                <span>Longitud ED</span>
-                <input name="longitud_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
-              </label>
-
-              <label class="field span-1">
-                <span>Latitud 2 ED</span>
-                <input name="latitud2_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
-              </label>
-
-              <label class="field span-1">
-                <span>Longitud 2 ED</span>
-                <input name="longitud2_ED" type="number" step="any" inputmode="decimal" data-coordinate="true" />
+                <input name="longitud2" type="text" inputmode="decimal" data-coordinate="true" />
               </label>
 
               <label class="field span-4">
@@ -127,14 +107,14 @@
 
             <div class="flow-panel" aria-live="polite">
               <div class="flow-top">
-                <p id="flowLabel">Paso 1 de 3 · Completá el formulario</p>
+                <p id="flowLabel">Paso 1 de 3 · Completá los obligatorios</p>
                 <p id="completionLabel">0% completo</p>
               </div>
               <div class="flow-track" aria-hidden="true">
                 <span id="progressBar" class="flow-bar"></span>
               </div>
               <p id="flowHelper" class="flow-helper">
-                Completá todos los campos para poder guardar y habilitar la descarga.
+                Completá los campos obligatorios para poder guardar y habilitar la descarga.
               </p>
             </div>
           </form>
@@ -155,7 +135,7 @@
 
         <div id="downloadGate" class="download-gate" data-state="blocked">
           <strong id="downloadGateTitle">Descarga bloqueada</strong>
-          <p id="downloadGateMessage">Completá el formulario al 100% y guardá los datos.</p>
+          <p id="downloadGateMessage">Completá los campos obligatorios y guardá los datos.</p>
         </div>
 
         <button id="btnDownload" type="button" class="btn btn-download" disabled aria-disabled="true">

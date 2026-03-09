@@ -24,6 +24,7 @@ const fieldSchema = [
   { name: "mail", type: "string" },
   { name: "observaciones", type: "string" }
 ];
+const requiredFieldNames = new Set(["codigo", "edificio", "latitud1", "longitud1", "direccion"]);
 const endpointStringEdFields = new Set([
   "latitud_ED",
   "longitud_ED",
@@ -77,11 +78,9 @@ function buildFieldLabelMap() {
 }
 
 function markSchemaFieldsAsRequired() {
-  for (const field of fieldSchema) {
-    const input = form.elements.namedItem(field.name);
-    if (input) {
-      input.required = true;
-    }
+  for (const input of formInputs) {
+    if (!input.name) continue;
+    input.required = requiredFieldNames.has(input.name);
   }
 }
 
@@ -94,12 +93,13 @@ function serializePayload(payload) {
 }
 
 function evaluatePayload(payload) {
-  const total = fieldSchema.length;
+  const requiredFields = fieldSchema.filter((field) => requiredFieldNames.has(field.name));
+  const total = requiredFields.length;
   const missingFields = [];
   const invalidFields = [];
   let validCount = 0;
 
-  for (const field of fieldSchema) {
+  for (const field of requiredFields) {
     const value = payload[field.name];
     let isValid = false;
 
@@ -119,15 +119,17 @@ function evaluatePayload(payload) {
 
       if (!isValid) {
         missingFields.push({ name: field.name });
-      } else if (field.name === "mail" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) {
-        isValid = false;
-        invalidFields.push({ name: field.name, reason: "email" });
       }
     }
 
     if (isValid) {
       validCount += 1;
     }
+  }
+
+  const emailText = String(payload.mail ?? "").trim();
+  if (emailText && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailText)) {
+    invalidFields.push({ name: "mail", reason: "email" });
   }
 
   const percentage = Math.round((validCount / total) * 100);
@@ -147,7 +149,7 @@ function getFieldLabel(name) {
 
 function getValidationGuidance(validation) {
   if (validation.isComplete) {
-    return "Formulario completo. Guardá los datos para habilitar la descarga.";
+    return "Campos obligatorios completos. Guardá los datos para habilitar la descarga.";
   }
 
   const missingLabels = validation.missingFields.slice(0, 4).map((field) => getFieldLabel(field.name));
@@ -165,7 +167,7 @@ function getValidationGuidance(validation) {
   const hasInvalidEmail = validation.invalidFields.some((field) => field.reason === "email");
   const emailCopy = hasInvalidEmail ? " Revisá el formato del mail." : "";
 
-  return `Completá todos los campos (${validation.validCount}/${validation.total}). ${missingCopy}${emailCopy}`.trim();
+  return `Completá los campos obligatorios (${validation.validCount}/${validation.total}). ${missingCopy}${emailCopy}`.trim();
 }
 
 function isPayloadRegistered(payload) {
@@ -199,7 +201,7 @@ function updateActionButtons(validation, isRegistered) {
   if (isSending) {
     sendButton.textContent = "Guardando datos...";
   } else if (!validation.isComplete) {
-    sendButton.textContent = `Completá el formulario (${validation.validCount}/${validation.total})`;
+    sendButton.textContent = `Completá obligatorios (${validation.validCount}/${validation.total})`;
   } else if (isRegistered) {
     sendButton.textContent = "Guardar cambios";
   } else if (endpointState.requestStatus === "error") {
@@ -217,7 +219,7 @@ function updateActionButtons(validation, isRegistered) {
   if (canDownload) {
     downloadButton.textContent = "Descargar JPG 1080x1350";
   } else if (!validation.isComplete) {
-    downloadButton.textContent = "Completá 100% para descargar";
+    downloadButton.textContent = "Completá obligatorios para descargar";
   } else {
     downloadButton.textContent = "Guardá los datos para descargar";
   }
@@ -235,9 +237,9 @@ function updateFlowState(payload = lastPayload) {
   updateActionButtons(validation, isRegistered);
 
   if (!validation.isComplete) {
-    flowLabel.textContent = "Paso 1 de 3 · Completá el formulario";
+    flowLabel.textContent = "Paso 1 de 3 · Completá los obligatorios";
     flowHelper.textContent = getValidationGuidance(validation);
-    setDownloadGate("blocked", "Descarga bloqueada", "Completá el formulario al 100% para continuar.");
+    setDownloadGate("blocked", "Descarga bloqueada", "Completá los campos obligatorios para continuar.");
     return { validation, isRegistered, canDownload };
   }
 
@@ -263,7 +265,7 @@ function updateFlowState(payload = lastPayload) {
     flowHelper.textContent = "Detectamos cambios sin guardar. Guardalos para habilitar la descarga.";
     setDownloadGate("blocked", "Descarga bloqueada", "Primero guardá los cambios.");
   } else {
-    flowHelper.textContent = "Formulario completo. Guardá los datos para desbloquear la descarga.";
+    flowHelper.textContent = "Campos obligatorios completos. Guardá los datos para desbloquear la descarga.";
     setDownloadGate("blocked", "Descarga bloqueada", "Primero guardá los datos.");
   }
 
@@ -303,9 +305,14 @@ function parseNumber(rawValue) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function floorToThreeDecimals(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  return Math.floor(value * 1000) / 1000;
+}
+
 function formatEdStringValue(value) {
   if (typeof value !== "number" || !Number.isFinite(value)) return "";
-  const floored = Math.floor(value * 1000) / 1000;
+  const floored = floorToThreeDecimals(value);
   return floored.toFixed(3).replace(".", ",");
 }
 
@@ -321,11 +328,11 @@ function buildEndpointPayload(payload) {
 }
 
 function normalizeCoordinateDraft(value) {
-  return value.replace(/,/g, ".");
+  return value;
 }
 
 function isCoordinateDraftValid(value) {
-  return /^-?\d*(?:\.\d*)?$/.test(value);
+  return /^-?\d*(?:[.,]\d*)?$/.test(value);
 }
 
 function handleCoordinateKeydown(event) {
@@ -339,7 +346,6 @@ function handleCoordinateInput(event) {
   const normalized = normalizeCoordinateDraft(input.value);
 
   if (isCoordinateDraftValid(normalized)) {
-    input.value = normalized;
     input.dataset.lastValid = normalized;
   } else {
     input.value = input.dataset.lastValid ?? "";
@@ -369,6 +375,11 @@ function collectPayload() {
       payload[field.name] = rawValue;
     }
   }
+
+  payload.latitud_ED = floorToThreeDecimals(payload.latitud1);
+  payload.longitud_ED = floorToThreeDecimals(payload.longitud1);
+  payload.latitud2_ED = floorToThreeDecimals(payload.latitud2);
+  payload.longitud2_ED = floorToThreeDecimals(payload.longitud2);
 
   return payload;
 }
@@ -599,7 +610,7 @@ async function handleSubmit(event) {
   const { validation } = updateFlowState(payload);
 
   if (!validation.isComplete) {
-    setStatus("Completá el formulario al 100% para guardar los datos.", "error");
+    setStatus("Completá los campos obligatorios para guardar los datos.", "error");
     return;
   }
 
@@ -656,7 +667,7 @@ function handleDownload() {
   if (!validation.isComplete) {
     showValidationErrors = true;
     updateFlowState(payload);
-    setStatus("Descarga bloqueada: completá el formulario al 100%.", "error");
+    setStatus("Descarga bloqueada: completá los campos obligatorios.", "error");
     return;
   }
 
@@ -688,7 +699,7 @@ async function init() {
   }
 
   endpointState.requestStatus = "idle";
-  setStatus("Completá el formulario, guardá los datos y luego descargá la imagen.", "info");
+  setStatus("Completá los campos obligatorios, guardá los datos y luego descargá la imagen.", "info");
   drawPoster(lastPayload);
   updateFlowState(lastPayload);
 }
