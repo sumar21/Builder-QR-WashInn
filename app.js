@@ -421,9 +421,29 @@ function wrapTextLines(text, maxWidth, font) {
   return lines;
 }
 
+function getBuildingDisplayName(payload) {
+  const building = String(payload.edificio || "").trim();
+  const address = String(payload.direccion || "").trim();
+
+  if (building && address) return `${building} - ${address}`;
+  if (building) return building;
+  if (address) return address;
+  return "AGREGA NOMBRE Y DIRECCION DEL EDIFICIO";
+}
+
 function getPosterTitle(payload) {
-  const fallback = "AGREGA DIRECCION DEL EDIFICIO";
-  return String(payload.direccion || payload.edificio || fallback).toUpperCase();
+  const building = String(payload.edificio || "").trim();
+  return (building || "AGREGA NOMBRE DEL EDIFICIO").toUpperCase();
+}
+
+function toDownloadSlug(text) {
+  return String(text || "")
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
 }
 
 function generateQrCanvas(codigo) {
@@ -676,7 +696,7 @@ function handleDownload() {
     return;
   }
 
-  const codeSuffix = (payload.codigo || "qr").toString().trim().replace(/\s+/g, "-");
+  const codeSuffix = toDownloadSlug(getBuildingDisplayName(payload)) || "qr";
   const link = document.createElement("a");
   link.download = `washinn-${codeSuffix}.jpg`;
   link.href = posterCanvas.toDataURL("image/jpeg", 0.94);
